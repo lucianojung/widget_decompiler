@@ -30,7 +30,7 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: WidgetDecompiler(child: Container(),),
+      body: WidgetDecompiler(child: Container(width: 100, height: 100, color: Colors.red,),),
     );
   }
 }

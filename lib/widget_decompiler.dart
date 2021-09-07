@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -6,88 +7,97 @@ import 'GlobalList.dart';
 class WidgetDecompiler extends StatefulWidget {
   final Widget child;
   final String widgetName;
+  final Color? backgroundColor;
 
-  const WidgetDecompiler({Key? key, required this.child, this.widgetName = 'MyWidget'}) : super(key: key);
+  const WidgetDecompiler(
+      {Key? key, required this.child, this.widgetName = 'MyWidget', this.backgroundColor})
+      : super(key: key);
 
   @override
   _WidgetDecompilerState createState() => _WidgetDecompilerState();
 }
 
-class _WidgetDecompilerState extends State<WidgetDecompiler> {
-  final Widget _child =
-  MediaQuery(data: MediaQueryData(), child: Container())
-  ;
-
+class _WidgetDecompilerState extends State<WidgetDecompiler>{
   bool _unfolded = false;
   String _childWidgetTree = '';
   BuildContext? _context;
+
+  String _widgetName = '';
+
+  @override
+  void initState() {
+    _widgetName = widget.widgetName;
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: SingleChildScrollView(
-        child: Container(
-          child: Column(
-            children: [
-              Builder(
-                builder: (context) {
-                  _context = context;
-                  return _child;
-                }
-              ),
-              Container(
-                decoration: BoxDecoration(
-                  color: Colors.red,
-                  borderRadius: BorderRadius.only(
-                    bottomRight: Radius.circular(16.0),
-                    bottomLeft: Radius.circular(16.0),
-                  ),
+        child: Column(
+          children: [
+            Builder(builder: (context) {
+              _context = context;
+              return widget.child;
+            }),
+            Container(
+              decoration: BoxDecoration(
+                color: widget.backgroundColor ?? Theme.of(context).primaryColor,
+                borderRadius: BorderRadius.only(
+                  bottomRight: Radius.circular(8.0),
+                  bottomLeft: Radius.circular(8.0),
                 ),
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    children: [
-                      Row(
-                        children: [
-                          IconButton(
-                              icon: Icon(Icons.copy),
-                              tooltip: 'copy widget Codeblock',
-                              onPressed: () {
-                                getWidgetTree('RedBoxWidget', _context);
-                                Clipboard.setData(
-                                  ClipboardData(text: _childWidgetTree),
-                                );
-                              }),
-                          Spacer(),
-                          IconButton(
-                            icon: Icon(_unfolded
-                                ? Icons.keyboard_arrow_up
-                                : Icons.keyboard_arrow_down),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Column(
+                  children: [
+                    Row(
+                      children: [
+                        IconButton(
+                            icon: Icon(Icons.copy),
+                            tooltip: 'copy widget Codeblock',
                             onPressed: () {
+                              // getSourceTree(_context!.widget.toStringShort(), _context);
                               getWidgetTree('RedBoxWidget', _context);
-                              setState(() {
-                                _unfolded = !_unfolded;
-                              });
-                            },
-                          ),
-                        ],
-                      ),
+                              Clipboard.setData(
+                                ClipboardData(text: _childWidgetTree),
+                              );
+                              final snackBar = SnackBar(
+                                  content: Text('Copied widget code to clipboard'),
+                                  backgroundColor: Theme.of(context).primaryColor);
+                              ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                            }),
+                        Spacer(),
+                        IconButton(
+                          icon: Icon(_unfolded
+                              ? Icons.keyboard_arrow_up
+                              : Icons.keyboard_arrow_down),
+                          onPressed: () {
+                            getWidgetTree(_widgetName, _context);
+                            setState(() {
+                              _unfolded = !_unfolded;
+                            });
+                          },
+                        ),
+                      ],
+                    ),
+                    if (_unfolded)
                       Align(
                         alignment: Alignment.centerLeft,
                         child: SelectableText(
-                          _unfolded ? _childWidgetTree : '',
+                          _childWidgetTree,
                           style: TextStyle(
                             fontFamily: 'AzeretMono-Medium',
                           ),
                         ),
                       ),
-                    ],
-                  ),
+                  ],
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -109,12 +119,13 @@ class _WidgetDecompilerState extends State<WidgetDecompiler> {
       }
       List<String> tempKnownChildren =
           GlobalLists.knownChildren[parent.toStringShort()] ?? [];
-      if (tempKnownChildren.contains(element.toStringShort().split('-').first)) {
+      if (tempKnownChildren
+          .contains(element.toStringShort().split('-').first)) {
         _getWidgetElementAndChildren(element, tabs, parent);
       } else {
         String widgetName = element.widget.toStringShort().split('-').first;
-        if(GlobalLists.multipleChildrenWidgets.contains(widgetName)) {
-          _childWidgetTree += '$s child: $widgetName( children: [\n';
+        if (GlobalLists.multipleChildrenWidgets.keys.contains(widgetName)) {
+          _childWidgetTree += '$s child: $widgetName( ${GlobalLists.multipleChildrenWidgets[widgetName]}: [\n';
         } else {
           _childWidgetTree += '$s child: $widgetName(\n';
         }
@@ -122,11 +133,12 @@ class _WidgetDecompilerState extends State<WidgetDecompiler> {
         _getWidgetElementAndChildren(
             element,
             tabs + 1,
-            GlobalLists.knownChildren.containsKey(element.widget.toStringShort())
+            GlobalLists.knownChildren
+                    .containsKey(element.widget.toStringShort())
                 ? element.widget
                 : parent);
 
-        if(GlobalLists.multipleChildrenWidgets.contains(widgetName)) {
+        if (GlobalLists.multipleChildrenWidgets.keys.contains(widgetName)) {
           _childWidgetTree += s + ']),\n';
         } else {
           _childWidgetTree += s + '),\n';
