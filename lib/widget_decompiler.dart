@@ -4,16 +4,19 @@ import 'package:flutter/services.dart';
 import 'GlobalList.dart';
 
 class WidgetDecompiler extends StatefulWidget {
+  final Widget child;
+  final String widgetName;
+
+  const WidgetDecompiler({Key? key, required this.child, this.widgetName = 'MyWidget'}) : super(key: key);
+
   @override
   _WidgetDecompilerState createState() => _WidgetDecompilerState();
 }
 
 class _WidgetDecompilerState extends State<WidgetDecompiler> {
-  final Widget _child = SizedBox(
-    child: Container(),
-    height: 100,
-    width: 400,
-  );
+  final Widget _child =
+  MediaQuery(data: MediaQueryData(), child: Container())
+  ;
 
   bool _unfolded = false;
   String _childWidgetTree = '';
@@ -35,7 +38,7 @@ class _WidgetDecompilerState extends State<WidgetDecompiler> {
               ),
               Container(
                 decoration: BoxDecoration(
-                  color: Theme.of(context).primaryColor,
+                  color: Colors.red,
                   borderRadius: BorderRadius.only(
                     bottomRight: Radius.circular(16.0),
                     bottomLeft: Radius.circular(16.0),
