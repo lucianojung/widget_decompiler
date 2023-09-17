@@ -27,10 +27,37 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  bool show = true;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: WidgetDecompiler(child: Container(width: 100, height: 100, color: Colors.red,),),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          setState(() {
+            show = !show;
+          });
+        },
+      ),
+      body: WidgetDecompiler(
+        width: 1000,
+        child: testWidget(),
+        show: show,
+      ),
     );
   }
+}
+
+Widget testWidget() {
+  return Container(
+    child: Row(
+      children: [
+        Container(),
+        Container()
+      ],
+    ),
+     width: 1000,
+     height: 100,
+    color: MaterialColor(0xfff44336, Map()),
+  );
 }
