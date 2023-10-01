@@ -4,7 +4,10 @@
 ## [0.0.2] - 07.09.2021
 - implement core functionality for Widget Categories Cupertino (iOS-style) widgets
 
--> https://flutter.dev/docs/development/ui/widgets
+## [0.9.0] - 01.10.2023
+- rework decompilation logic
+- update flutter and pupspec
+- recolor and insert example
 
  
 

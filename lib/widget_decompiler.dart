@@ -3,8 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 
-import 'GlobalList.dart';
-
 class WidgetDecompiler extends StatefulWidget {
   final Widget child;
   final String widgetName;
