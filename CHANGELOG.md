@@ -9,5 +9,6 @@
 - update flutter and pupspec
 - recolor and insert example
 
- 
+## [0.9.1] - 01.10.2023
+- cleanup code smells
 
