@@ -12,6 +12,11 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       // title of the app
       title: 'Widget Decompiler Demo',
+      // theme of the app
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        useMaterial3: true,
+      ),
       // home page of the app
       home: MyHomePage(),
     );
@@ -33,6 +38,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       floatingActionButton: FloatingActionButton(
+        child: Icon(!show ? Icons.visibility : Icons.visibility_off),
         onPressed: () {
           setState(() {
             show = !show;
@@ -43,21 +49,16 @@ class _MyHomePageState extends State<MyHomePage> {
         width: 1000,
         child: testWidget(),
         show: show,
+        backgroundColor: Color(0xFF67BCB3),
       ),
     );
   }
 }
 
 Widget testWidget() {
-  return Container(
-    child: Row(
-      children: [
-        Container(),
-        Container()
-      ],
-    ),
-     width: 1000,
-     height: 100,
-    color: MaterialColor(0xfff44336, Map()),
+  return Center(
+    child: Container(
+      child: Image.asset('assets/flutter_packages_logo_192.png',),
+    )
   );
 }
