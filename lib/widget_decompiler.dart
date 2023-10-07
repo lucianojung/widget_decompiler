@@ -136,18 +136,23 @@ class _WidgetDecompilerState extends State<WidgetDecompiler> {
   _getChildElement(BuildContext? context, int depth, childrenCount) {
     var childIndex = 1;
     context!.visitChildElements((Element element) {
-      String widgetName = element.toDiagnosticsNode().getProperties()[1].value.toString().split('(')[0];
+      String widgetName = element
+          .toDiagnosticsNode()
+          .getProperties()[1]
+          .value
+          .toString()
+          .split('(')[0];
 
+      print(widgetName);
       if (widgetName.startsWith('_')) {
         //skip this widget
         _getChildElement(
             element, depth, element.toDiagnosticsNode().getChildren().length);
-      }
-
-      // print('*widget: ${element.toDiagnosticsNode().getProperties()[1]} -- depth $depth');
-      // print('--properties: ${element.toDiagnosticsNode().getProperties()}');
-      // print('--children: ${element.toDiagnosticsNode().getChildren()}');
-      _addDepthTabs(depth);
+      } else {
+        // print('*widget: ${element.toDiagnosticsNode().getProperties()[1]} -- depth $depth');
+        // print('--properties: ${element.toDiagnosticsNode().getProperties()}');
+        // print('--children: ${element.toDiagnosticsNode().getChildren()}');
+        _addDepthTabs(depth);
 /*      element
           .toDiagnosticsNode()
           .getProperties()
@@ -167,67 +172,66 @@ class _WidgetDecompilerState extends State<WidgetDecompiler> {
         print(element2.toStringDeep());
       });*/
 
-      if (childrenCount == 1) {
-        _childWidgetTree +=
-            'child: $widgetName (\n';
-      } else {
-        depth += 1;
-        if (childIndex == 1) {
-          _childWidgetTree += 'children: [\n';
-          _addDepthTabs(depth);
+        if (childrenCount == 1) {
+          _childWidgetTree += 'child: $widgetName (\n';
+        } else {
+          depth += 1;
+          if (childIndex == 1) {
+            _childWidgetTree += 'children: [\n';
+            _addDepthTabs(depth);
+          }
+          _childWidgetTree += '$widgetName (\n';
         }
-        _childWidgetTree +=
-            '$widgetName (\n';
-      }
-      _getChildElement(
-          element, depth + 1, element.toDiagnosticsNode().getChildren().length);
+        _getChildElement(element, depth + 1,
+            element.toDiagnosticsNode().getChildren().length);
 
-      element
-          .toDiagnosticsNode()
-          .getProperties()
-          .where((element) =>
-              !element.toString().contains('null') &&
-              !element.toString().contains('widget'))
-          .forEach((element) {
-        //print(element.value.toString());
+        element
+            .toDiagnosticsNode()
+            .getProperties()
+            .where((element) =>
+                !element.toString().contains('null') &&
+                !element.toString().contains('widget'))
+            .forEach((element) {
+          //print(element.value.toString());
 
-        //is color
-        var regexHexColor = RegExp('0xff(?:[0-9a-fA-F]{6})');
-        if (element.toString().contains(regexHexColor)) {
-          var name = element.name.toString().length > 2
-              ? element.name.toString()
-              : 'color';
-          print(regexHexColor.allMatches(element.value.toString()));
-          var value =
-              'MaterialColor(${regexHexColor.firstMatch(element.value.toString())?.group(0)}, Map())';
+          //is color
+          var regexHexColor = RegExp('0xff(?:[0-9a-fA-F]{6})');
+          if (element.toString().contains(regexHexColor)) {
+            var name = element.name.toString().length > 2
+                ? element.name.toString()
+                : 'color';
+            print(regexHexColor.allMatches(element.value.toString()));
+            var value =
+                'MaterialColor(${regexHexColor.firstMatch(element.value.toString())?.group(0)}, Map())';
 
-          _addDepthTabs(depth);
-          _childWidgetTree += '$name: $value,\n';
-        }
+            _addDepthTabs(depth);
+            _childWidgetTree += '$name: $value,\n';
+          }
 
-        //is object (default)
-        else if (element.toString().contains('(')) {
-          var name = element.name.toString();
-          var value = element.value.toString();
-          value = value.replaceAll('w=', 'minWidth: ');
-          value = value.replaceAll('h=', 'minHeight: ');
-          value = value.replaceAll('biggest', '');
+          //is object (default)
+          else if (element.toString().contains('(')) {
+            var name = element.name.toString();
+            var value = element.value.toString();
+            value = value.replaceAll('w=', 'minWidth: ');
+            value = value.replaceAll('h=', 'minHeight: ');
+            value = value.replaceAll('biggest', '');
 
-          _addDepthTabs(depth);
-          _childWidgetTree += '$name: $value,\n';
-        }
-      });
+            _addDepthTabs(depth);
+            _childWidgetTree += '$name: $value,\n';
+          }
+        });
 
-      _addDepthTabs(depth);
-      _childWidgetTree += '),\n';
-
-      if (childIndex == childrenCount && childrenCount > 1) {
         _addDepthTabs(depth);
-        _childWidgetTree += '],\n';
-      }
+        _childWidgetTree += '),\n';
 
-      depth -= 1;
-      childIndex++;
+        if (childIndex == childrenCount && childrenCount > 1) {
+          _addDepthTabs(depth);
+          _childWidgetTree += '],\n';
+        }
+
+        depth -= 1;
+        childIndex++;
+      }
     });
   }
 

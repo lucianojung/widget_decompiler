@@ -12,9 +12,11 @@
 ## [0.9.1] - 01.10.2023
 - cleanup code smells
 
-
 ## [0.9.2] - 07.10.2023
 - add scrollable dropdown if code is too long
 - remove default width
 - fix default name
 - remove widgets with name starting '_' from decompiled code
+
+## [0.9.3] - 07.10.2023
+- bugfix multiplying widgets
