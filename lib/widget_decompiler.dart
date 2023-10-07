@@ -5,7 +5,7 @@ class WidgetDecompiler extends StatefulWidget {
   final Widget child;
   final String widgetName;
   final Color? backgroundColor;
-  final bool show;
+  final bool showWidget, showProperties;
   final double? width;
 
   const WidgetDecompiler(
@@ -13,7 +13,8 @@ class WidgetDecompiler extends StatefulWidget {
       required this.child,
       this.widgetName = 'MyWidget',
       this.backgroundColor,
-      this.show = true,
+      this.showWidget = true,
+      this.showProperties = true,
       this.width});
 
   @override
@@ -40,7 +41,7 @@ class _WidgetDecompilerState extends State<WidgetDecompiler> {
         width: widget.width,
         child: Align(
           alignment: Alignment.topCenter,
-          child: widget.show
+          child: widget.showWidget
               ? Column(
                   children: [
                     Builder(builder: (context) {
@@ -182,44 +183,13 @@ class _WidgetDecompilerState extends State<WidgetDecompiler> {
           }
           _childWidgetTree += '$widgetName (\n';
         }
+
+        if (widget.showProperties) {
+          includeProperties(element.toDiagnosticsNode().getProperties(), depth+1);
+        }
+
         _getChildElement(element, depth + 1,
             element.toDiagnosticsNode().getChildren().length);
-
-        element
-            .toDiagnosticsNode()
-            .getProperties()
-            .where((element) =>
-                !element.toString().contains('null') &&
-                !element.toString().contains('widget'))
-            .forEach((element) {
-          //print(element.value.toString());
-
-          //is color
-          var regexHexColor = RegExp('0xff(?:[0-9a-fA-F]{6})');
-          if (element.toString().contains(regexHexColor)) {
-            var name = element.name.toString().length > 2
-                ? element.name.toString()
-                : 'color';
-            print(regexHexColor.allMatches(element.value.toString()));
-            var value =
-                'MaterialColor(${regexHexColor.firstMatch(element.value.toString())?.group(0)}, Map())';
-
-            _addDepthTabs(depth);
-            _childWidgetTree += '$name: $value,\n';
-          }
-
-          //is object (default)
-          else if (element.toString().contains('(')) {
-            var name = element.name.toString();
-            var value = element.value.toString();
-            value = value.replaceAll('w=', 'minWidth: ');
-            value = value.replaceAll('h=', 'minHeight: ');
-            value = value.replaceAll('biggest', '');
-
-            _addDepthTabs(depth);
-            _childWidgetTree += '$name: $value,\n';
-          }
-        });
 
         _addDepthTabs(depth);
         _childWidgetTree += '),\n';
@@ -239,5 +209,42 @@ class _WidgetDecompilerState extends State<WidgetDecompiler> {
     for (int i = 0; i < depth; i++) {
       _childWidgetTree += '   ';
     }
+  }
+
+  void includeProperties(List properties, int depth) {
+    properties
+        .where((element) =>
+            element.toString() != 'null' &&
+            !element.toString().startsWith('state') &&
+            !element.toString().contains('widget'))
+        .forEach((element) {
+
+      String key = element.toString().split(': ')[0];
+      String value = element.toString().split(': ')[1];
+
+      //skip null values, depth parameters
+      if(value == 'null' || key == 'depth') {
+        return;
+      }
+
+      //contains color
+      var regexHexColor = RegExp('0xff(?:[0-9a-fA-F]{6})');
+      if (element.toString().contains(regexHexColor)) {
+        key = element.toString().length > 2 ? element.toString() : 'color';
+        value =
+            'MaterialColor(${regexHexColor.firstMatch(element.value.toString())?.group(0)}, Map())';
+      }
+      //is object (default)
+      else if (element.toString().contains('(')) {
+        key = element.toString();
+        value = element.toString();
+        value = value.replaceAll('w=', 'minWidth: ');
+        value = value.replaceAll('h=', 'minHeight: ');
+        value = value.replaceAll('biggest', '');
+      }
+
+      _addDepthTabs(depth);
+      _childWidgetTree += '$key: $value,\n';
+    });
   }
 }

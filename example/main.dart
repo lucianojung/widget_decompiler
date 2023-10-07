@@ -49,7 +49,7 @@ class _MyHomePageState extends State<MyHomePage> {
       body: WidgetDecompiler(
         width: 1000,
         child: testWidget(),
-        show: show,
+        showWidget: show,
         backgroundColor: Color(0xFF67BCB3),
       ),
     );

@@ -20,3 +20,8 @@
 
 ## [0.9.3] - 07.10.2023
 - bugfix multiplying widgets
+
+## [0.9.4] - 07.10.2023
+- expand properties logic
+- add variable to opt out properties in code
+- cleanup code
