@@ -14,7 +14,7 @@ class MyApp extends StatelessWidget {
       title: 'Widget Decompiler Demo',
       // theme of the app
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        colorScheme: ColorScheme.fromSeed(seedColor: Color(0xFF67BCB3)),
         useMaterial3: true,
       ),
       // home page of the app
@@ -44,6 +44,7 @@ class _MyHomePageState extends State<MyHomePage> {
             show = !show;
           });
         },
+      backgroundColor: Color(0xFF67BCB3),
       ),
       body: WidgetDecompiler(
         width: 1000,
@@ -58,7 +59,7 @@ class _MyHomePageState extends State<MyHomePage> {
 Widget testWidget() {
   return Center(
     child: Container(
-      child: Image.asset('assets/flutter_packages_logo_192.png',),
+      child: Image.asset('assets/flutter_packages_logo_512.png',),
     )
   );
 }

@@ -6,16 +6,15 @@ class WidgetDecompiler extends StatefulWidget {
   final String widgetName;
   final Color? backgroundColor;
   final bool show;
-  final double width;
+  final double? width;
 
-  const WidgetDecompiler({Key? key,
-    required this.child,
-    this.widgetName = 'MyWidget',
-    this.backgroundColor,
-    this.show = true,
-    this.width = 200})
-      : assert(width >= 112),
-        super(key: key);
+  const WidgetDecompiler(
+      {Key? key,
+      required this.child,
+      this.widgetName = 'MyWidget',
+      this.backgroundColor,
+      this.show = true,
+      this.width});
 
   @override
   _WidgetDecompilerState createState() => _WidgetDecompilerState();
@@ -36,89 +35,90 @@ class _WidgetDecompilerState extends State<WidgetDecompiler> {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: widget.width,
-      child: Align(
-        alignment: Alignment.topCenter,
-        child: widget.show
-            ? Column(
-          children: [
-            Builder(builder: (context) {
-              _context = context;
-              return widget.child;
-            }),
-            Container(
-              decoration: BoxDecoration(
-                color: widget.backgroundColor ??
-                    Theme
-                        .of(context)
-                        .primaryColor,
-                borderRadius: BorderRadius.only(
-                  bottomRight: Radius.circular(8.0),
-                  bottomLeft: Radius.circular(8.0),
-                ),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Column(
+    return SingleChildScrollView(
+      child: SizedBox(
+        width: widget.width,
+        child: Align(
+          alignment: Alignment.topCenter,
+          child: widget.show
+              ? Column(
                   children: [
-                    Row(
-                      children: [
-                        IconButton(
-                            icon: Icon(Icons.copy, color: Colors.black87),
-                            tooltip: 'copy widget Codeblock',
-                            onPressed: () {
-                              // getSourceTree(_context!.widget.toStringShort(), _context);
-                              getWidgetTree(
-                                  widget.child, 'RedBoxWidget', _context);
-                              Clipboard.setData(
-                                ClipboardData(text: _childWidgetTree),
-                              );
-                              final snackBar = SnackBar(
-                                  content: Text(
-                                      'Copied widget code to clipboard',
-                                      style: TextStyle(color: Colors.black)),
-                                  backgroundColor: widget.backgroundColor ??
-                                      Theme.of(context).primaryColor
-                              );
-                              ScaffoldMessenger.of(context)
-                                  .showSnackBar(snackBar
-                              );
-                            }),
-                        Spacer(),
-                        IconButton(
-                          icon: Icon(
-                              _unfolded
-                                  ? Icons.keyboard_arrow_up
-                                  : Icons.keyboard_arrow_down,
-                              color: Colors.black87),
-                          onPressed: () {
-                            getWidgetTree(
-                                widget.child, _widgetName, _context);
-                            setState(() {
-                              _unfolded = !_unfolded;
-                            });
-                          },
-                        ),
-                      ],
-                    ),
-                    if (_unfolded)
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: SelectableText(
-                          _childWidgetTree,
-                          // style: TextStyle(
-                          //   fontFamily: 'AzeretMono-Medium',
-                          // ),
+                    Builder(builder: (context) {
+                      _context = context;
+                      return widget.child;
+                    }),
+                    Container(
+                      decoration: BoxDecoration(
+                        color: widget.backgroundColor ??
+                            Theme.of(context).primaryColor,
+                        borderRadius: BorderRadius.only(
+                          bottomRight: Radius.circular(8.0),
+                          bottomLeft: Radius.circular(8.0),
                         ),
                       ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Column(
+                          children: [
+                            Row(
+                              children: [
+                                IconButton(
+                                    icon:
+                                        Icon(Icons.copy, color: Colors.black87),
+                                    tooltip: 'copy widget Codeblock',
+                                    onPressed: () {
+                                      // getSourceTree(_context!.widget.toStringShort(), _context);
+                                      getWidgetTree(widget.child,
+                                          widget.widgetName, _context);
+                                      Clipboard.setData(
+                                        ClipboardData(text: _childWidgetTree),
+                                      );
+                                      final snackBar = SnackBar(
+                                          content: Text(
+                                              'Copied widget code to clipboard',
+                                              style: TextStyle(
+                                                  color: Colors.black)),
+                                          backgroundColor: widget
+                                                  .backgroundColor ??
+                                              Theme.of(context).primaryColor);
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(snackBar);
+                                    }),
+                                Spacer(),
+                                IconButton(
+                                  icon: Icon(
+                                      _unfolded
+                                          ? Icons.keyboard_arrow_up
+                                          : Icons.keyboard_arrow_down,
+                                      color: Colors.black87),
+                                  onPressed: () {
+                                    getWidgetTree(
+                                        widget.child, _widgetName, _context);
+                                    setState(() {
+                                      _unfolded = !_unfolded;
+                                    });
+                                  },
+                                ),
+                              ],
+                            ),
+                            if (_unfolded)
+                              Align(
+                                alignment: Alignment.centerLeft,
+                                child: SelectableText(
+                                  _childWidgetTree,
+                                  // style: TextStyle(
+                                  //   fontFamily: 'AzeretMono-Medium',
+                                  // ),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                    ),
                   ],
-                ),
-              ),
-            ),
-          ],
-        )
-            : widget.child,
+                )
+              : widget.child,
+        ),
       ),
     );
   }
@@ -136,6 +136,14 @@ class _WidgetDecompilerState extends State<WidgetDecompiler> {
   _getChildElement(BuildContext? context, int depth, childrenCount) {
     var childIndex = 1;
     context!.visitChildElements((Element element) {
+      String widgetName = element.toDiagnosticsNode().getProperties()[1].value.toString().split('(')[0];
+
+      if (widgetName.startsWith('_')) {
+        //skip this widget
+        _getChildElement(
+            element, depth, element.toDiagnosticsNode().getChildren().length);
+      }
+
       // print('*widget: ${element.toDiagnosticsNode().getProperties()[1]} -- depth $depth');
       // print('--properties: ${element.toDiagnosticsNode().getProperties()}');
       // print('--children: ${element.toDiagnosticsNode().getChildren()}');
@@ -161,8 +169,7 @@ class _WidgetDecompilerState extends State<WidgetDecompiler> {
 
       if (childrenCount == 1) {
         _childWidgetTree +=
-        'child: ${element.toDiagnosticsNode().getProperties()[1].value
-            .toString().split('(')[0]} (\n';
+            'child: $widgetName (\n';
       } else {
         depth += 1;
         if (childIndex == 1) {
@@ -170,32 +177,29 @@ class _WidgetDecompilerState extends State<WidgetDecompiler> {
           _addDepthTabs(depth);
         }
         _childWidgetTree +=
-        '${element.toDiagnosticsNode().getProperties()[1].value.toString()
-            .split('(')[0]} (\n';
+            '$widgetName (\n';
       }
       _getChildElement(
-          element, depth + 1, element
-          .toDiagnosticsNode()
-          .getChildren()
-          .length);
+          element, depth + 1, element.toDiagnosticsNode().getChildren().length);
 
-      element.toDiagnosticsNode().getProperties().where((element) =>
-      !element.toString().contains('null') && !element.toString().contains('widget'))
+      element
+          .toDiagnosticsNode()
+          .getProperties()
+          .where((element) =>
+              !element.toString().contains('null') &&
+              !element.toString().contains('widget'))
           .forEach((element) {
         //print(element.value.toString());
 
         //is color
         var regexHexColor = RegExp('0xff(?:[0-9a-fA-F]{6})');
         if (element.toString().contains(regexHexColor)) {
-          var name = element.name
-              .toString()
-              .length > 2
+          var name = element.name.toString().length > 2
               ? element.name.toString()
               : 'color';
           print(regexHexColor.allMatches(element.value.toString()));
           var value =
-              'MaterialColor(${regexHexColor.firstMatch(
-              element.value.toString())?.group(0)}, Map())';
+              'MaterialColor(${regexHexColor.firstMatch(element.value.toString())?.group(0)}, Map())';
 
           _addDepthTabs(depth);
           _childWidgetTree += '$name: $value,\n';

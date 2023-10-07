@@ -1,6 +1,6 @@
 name: widget_decompiler
 description: A new Flutter package, that lets you reverse engineer it's child widget to enable a reusage of it.
-version: 0.9.1
+version: 0.9.2
 homepage: https://github.com/lucianojung/widget_decompiler
 
 environment:
